@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@jobhunter/api/core": ["libs/api/core/src/index.ts"]
+      "@jobhunter/api/core": ["libs/api/core/src/index.ts"],
+      "@jobhunter/api/job": ["libs/api/job/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
