@@ -10,7 +10,7 @@ import { validationSchema } from './config/validation'
     CacheModule.register<any>({
       isGlobal: true,
       store: redisStore,
-      URL: 'rediss://red-cerhtkp4reb229l8etmg:Gi1w22LpCDLIv4z38r0Z6Um9GyhvYAAa@oregon-redis.render.com:6379',
+      URL: process.env.REDIS_URL,
     }),
     ConfigModule.forRoot({
       isGlobal: true,
