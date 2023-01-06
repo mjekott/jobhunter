@@ -17,12 +17,16 @@
     "install": "^0.13.0",
     "joi": "^17.7.0",
     "mongoose": "^6.8.2",
+    "mongoose-slug-generator": "^1.0.4",
+    "node-geocoder": "^4.2.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.0.0",
+    "slugify": "^1.6.5",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@nestjs/schematics": "^9.0.0",
+    "@nestjs/swagger": "^6.1.4",
     "@nestjs/testing": "^9.0.0",
     "@nrwl/eslint-plugin-nx": "15.4.4",
     "@nrwl/jest": "15.4.4",
