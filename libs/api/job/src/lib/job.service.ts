@@ -3,13 +3,21 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { CreateJobDto } from './dto/create-job.dto'
 import { Job, JobDocument } from './schema/job.schema'
+import { ApiFilters } from './utils/apiFilters'
 import geoCoder from './utils/geocoder'
 
 @Injectable()
 export class JobService {
   constructor(@InjectModel(Job.name) private readonly jobModel: Model<JobDocument>) {}
-  async getAll() {
-    return this.jobModel.find({})
+  async getAll(query: { [key: string]: string }) {
+    const apiFilters = new ApiFilters(this.jobModel.find(), query)
+      .filter()
+      .sort()
+      .limitFields()
+      .searchByQuery()
+      .pagination()
+    const jobs: any = await apiFilters.query
+    return { count: jobs.length, jobs }
   }
   async createJob(data: CreateJobDto) {
     const newJob = new this.jobModel(data)

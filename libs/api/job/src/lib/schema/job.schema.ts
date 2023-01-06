@@ -46,7 +46,7 @@ export class Job {
   @Prop({ type: String, slug: 'title', unique: true })
   slug: string
 
-  @Prop()
+  @Prop({ index: true })
   description: string
 
   @Prop()
@@ -81,7 +81,7 @@ export class Job {
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job)
-JobSchema.index({ title: 'text' })
+JobSchema.index({ title: 'text', description: 'text' })
 
 JobSchema.pre('save', async function (next) {
   if (this.isModified('address')) {

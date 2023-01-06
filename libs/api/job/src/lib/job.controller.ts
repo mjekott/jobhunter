@@ -10,6 +10,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseInterceptors,
 } from '@nestjs/common'
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
@@ -27,8 +28,8 @@ export class JobController {
   @UseInterceptors(CacheInterceptor)
   @CacheKey('get_all_jobs')
   @CacheTTL(60)
-  async getAll() {
-    return this.jobService.getAll()
+  async getAll(@Query() query: { [key: string]: string }) {
+    return this.jobService.getAll(query)
   }
 
   @Get('/slug/:slug')
