@@ -38,6 +38,7 @@ export class Location {
 
 @Schema({
   timestamps: true,
+  versionKey: false,
 })
 export class Job {
   @Prop({ required: true, index: true })

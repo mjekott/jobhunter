@@ -1,3 +1,5 @@
+import { Public, Roles, RolesGuard } from '@jobhunter/api/auth'
+import { Role } from '@jobhunter/api/user'
 import {
   Body,
   CacheInterceptor,
@@ -11,9 +13,11 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
 import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+
 import { IdValidationPipe } from './../../../shared/src/lib/pipes/id.validation.pipe'
 import { CreateJobDto } from './dto/create-job.dto'
 import { JobService } from './job.service'
@@ -24,6 +28,7 @@ export class JobController {
   constructor(private readonly jobService: JobService) {}
 
   @Get()
+  @Public()
   @ApiOperation({ summary: 'Get Jobs' })
   @UseInterceptors(CacheInterceptor)
   @CacheKey('get_all_jobs')
@@ -32,16 +37,19 @@ export class JobController {
     return this.jobService.getAll(query)
   }
 
+  @Public()
   @Get('/slug/:slug')
   async getJobBySlug(@Param('slug') slug: string) {
     return this.jobService.getJobBySlug(slug)
   }
 
+  @Public()
   @Get('/statistics/:topic')
   async getStatistics(@Param('topic') topic: string) {
     return this.jobService.getStatistics(topic)
   }
 
+  @Public()
   @Get('/:zipCode/:distance')
   @UseInterceptors(CacheInterceptor)
   @CacheKey('get_jobs_within_distance')
@@ -50,33 +58,27 @@ export class JobController {
     return this.jobService.getJobsInRadius({ zipCode, distance })
   }
 
+  @Roles(Role.EMPLOYER)
+  @UseGuards(RolesGuard)
   @Post()
   @HttpCode(201)
   async createJob(@Body() data: CreateJobDto) {
     return this.jobService.createJob(data)
   }
 
+  @Public()
   @Get('/:id')
   async getJobById(@Param('id', IdValidationPipe) id: string) {
     return this.jobService.getJobById(id)
   }
 
+  @Roles(Role.EMPLOYER)
   @Put('/:id')
-  @ApiParam({
-    name: 'id',
-    type: 'The ID of the job',
-  })
-  @ApiOkResponse({
-    description: 'OK',
-    type: CreateJobDto,
-  })
-  @ApiNotFoundResponse({
-    description: 'Job not found',
-  })
   async updateJob(@Param('id', IdValidationPipe) id: string, @Body() data: CreateJobDto) {
     return this.jobService.updateJob(id, data)
   }
 
+  @Roles(Role.EMPLOYER)
   @Delete('/:id')
   @ApiParam({
     name: 'id',
