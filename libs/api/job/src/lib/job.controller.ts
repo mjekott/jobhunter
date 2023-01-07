@@ -1,5 +1,5 @@
-import { Public, Roles, RolesGuard } from '@jobhunter/api/auth'
-import { Role } from '@jobhunter/api/user'
+import { CurrentUser, Public, Roles, RolesGuard } from '@jobhunter/api/auth'
+import { Role, UserDocument } from '@jobhunter/api/user'
 import {
   Body,
   CacheInterceptor,
@@ -62,8 +62,8 @@ export class JobController {
   @UseGuards(RolesGuard)
   @Post()
   @HttpCode(201)
-  async createJob(@Body() data: CreateJobDto) {
-    return this.jobService.createJob(data)
+  async createJob(@Body() data: CreateJobDto, @CurrentUser() user: UserDocument) {
+    return this.jobService.createJob(data, user.id)
   }
 
   @Public()
@@ -74,8 +74,12 @@ export class JobController {
 
   @Roles(Role.EMPLOYER)
   @Put('/:id')
-  async updateJob(@Param('id', IdValidationPipe) id: string, @Body() data: CreateJobDto) {
-    return this.jobService.updateJob(id, data)
+  async updateJob(
+    @Param('id', IdValidationPipe) id: string,
+    @Body() data: CreateJobDto,
+    @CurrentUser() user: UserDocument,
+  ) {
+    return this.jobService.updateJob(id, data, user.id)
   }
 
   @Roles(Role.EMPLOYER)
@@ -91,7 +95,7 @@ export class JobController {
     description: 'Job not found',
   })
   @HttpCode(204)
-  async deleteJob(@Param('id', IdValidationPipe) id: string) {
-    return this.jobService.deleteJob(id)
+  async deleteJob(@Param('id', IdValidationPipe) id: string, @CurrentUser() user: UserDocument) {
+    return this.jobService.deleteJob(id, user.id)
   }
 }

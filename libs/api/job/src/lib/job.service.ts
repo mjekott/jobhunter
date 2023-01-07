@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { CreateJobDto } from './dto/create-job.dto'
@@ -19,8 +19,8 @@ export class JobService {
     const jobs: any = await apiFilters.query
     return { count: jobs.length, jobs }
   }
-  async createJob(data: CreateJobDto) {
-    const newJob = new this.jobModel(data)
+  async createJob(data: CreateJobDto, creator: string) {
+    const newJob = new this.jobModel({ ...data, creator })
     await newJob.save()
     return newJob
   }
@@ -35,16 +35,18 @@ export class JobService {
     })
   }
 
-  async updateJob(id: string, data: CreateJobDto) {
-    await this.findJobOrFail(id)
-
+  async updateJob(id: string, data: CreateJobDto, currentUser: string) {
+    const job = await this.findJobOrFail(id)
+    this.authorizeUser(job.creator.id, currentUser)
     return this.jobModel.findByIdAndUpdate(id, data, {
       new: true,
     })
   }
 
-  async deleteJob(id: string) {
-    await this.findJobOrFail(id)
+  async deleteJob(id: string, currentUser: string) {
+    const job = await this.findJobOrFail(id)
+
+    this.authorizeUser(job.creator.id, currentUser)
 
     return this.jobModel.findByIdAndDelete(id)
   }
@@ -76,10 +78,16 @@ export class JobService {
   }
 
   private async findJobOrFail(id: string) {
-    const job = await this.jobModel.findById(id)
+    const job = await this.jobModel.findById(id).populate('creator')
     if (!job) {
       throw new NotFoundException(`Job not found`)
     }
     return job
+  }
+
+  private authorizeUser(creatorId: string, currentUserID) {
+    if (creatorId !== currentUserID) {
+      throw new ForbiddenException('No access to this resource')
+    }
   }
 }

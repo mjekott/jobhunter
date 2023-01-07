@@ -1,5 +1,6 @@
+import { UserDocument } from '@jobhunter/api/user'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument } from 'mongoose'
+import mongoose, { HydratedDocument } from 'mongoose'
 import geoCoder from '../utils/geocoder'
 export type JobDocument = HydratedDocument<Job>
 
@@ -79,6 +80,9 @@ export class Job {
 
   @Prop({ type: Object, ref: 'Location' })
   location?: Location
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  creator: UserDocument
 }
 
 export const JobSchema = SchemaFactory.createForClass(Job)
