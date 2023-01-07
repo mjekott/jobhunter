@@ -7,3 +7,7 @@ services:
       - '27017:27017'
     volumes:
       - /app/server:/data/db
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '6379:6379'

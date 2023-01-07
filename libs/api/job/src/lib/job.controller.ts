@@ -31,9 +31,9 @@ export class JobController {
   @Public()
   @ApiOperation({ summary: 'Get Jobs' })
   @UseInterceptors(CacheInterceptor)
-  @CacheKey('get_all_jobs')
-  @CacheTTL(60)
+  @CacheTTL(5)
   async getAll(@Query() query: { [key: string]: string }) {
+    console.log('hello')
     return this.jobService.getAll(query)
   }
 

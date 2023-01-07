@@ -3,8 +3,10 @@ import { Throttle, ThrottlerGuard } from '@nestjs/throttler'
 import { AuthService } from './auth.service'
 import { CurrentUser } from './decorators'
 import { Public } from './decorators/public.decorator'
+import { ForgotPasswordDto } from './dto/forgotPassword.dto'
 import { LoginDto } from './dto/login.dto'
 import { SignUpDto } from './dto/signup.dto'
+import { VerifyCodeDto } from './dto/verifyCode.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -62,5 +64,21 @@ export class AuthController {
   @Get('/refresh')
   async refresh(@Req() request) {
     return await this.authService.refresh(request.cookies.refreshToken)
+  }
+
+  @UseGuards(ThrottlerGuard)
+  @Throttle(5, 300)
+  @Public()
+  @Post('/forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(forgotPasswordDto.email)
+    return { ok: true }
+  }
+
+  @Public()
+  @Post('/verify-otp')
+  async verify(@Body() verifyCodeDto: VerifyCodeDto) {
+    await this.authService.changePassword(verifyCodeDto.code, verifyCodeDto.password)
+    return { ok: true }
   }
 }

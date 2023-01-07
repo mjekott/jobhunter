@@ -1,3 +1,4 @@
+import { MailModule } from '@jobhunter/api/mail'
 import { UserModule } from '@jobhunter/api/user'
 import { Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
@@ -12,6 +13,7 @@ import { JwtStrategy } from './strategy/jwt.strategy'
 @Module({
   imports: [
     PassportModule,
+    MailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {

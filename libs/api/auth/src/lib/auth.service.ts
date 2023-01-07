@@ -1,10 +1,13 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common'
+import { BadRequestException, CACHE_MANAGER, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { SignUpDto } from './dto/signup.dto'
 
+import { MailService } from '@jobhunter/api/mail'
 import { UserService } from '@jobhunter/api/user'
 import { JwtService } from '@nestjs/jwt'
+import { Cache } from 'cache-manager'
 import { LoginDto } from './dto/login.dto'
+import { generateCode } from './utils/generateCode'
 
 @Injectable()
 export class AuthService {
@@ -12,6 +15,8 @@ export class AuthService {
     private readonly userService: UserService,
     private jwtService: JwtService,
     private readonly configService: ConfigService,
+    private mailService: MailService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   // Register User
@@ -61,6 +66,32 @@ export class AuthService {
     const token = await this.generateAccessToken(user.id)
 
     return { token }
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.userService.findOne(email)
+    if (!user) {
+      throw new BadRequestException(`Code has been sent to your inbox`)
+    }
+    const code = generateCode()
+    await this.cacheManager.set(`forgotPassword-${code}`, user.id, { ttl: 600 } as unknown as number)
+    await this.mailService.sendForgotPassword(email, code)
+    return code
+  }
+
+  async changePassword(verificationCode: string, password: string) {
+    const id: string | null = await this.cacheManager.get(`forgotPassword-${verificationCode}`)
+    if (!id) {
+      throw new BadRequestException('Invalid Credentials')
+    }
+    const user = await this.userService.findById(id)
+    if (!user) {
+      throw new BadRequestException('Invalid Credentials')
+    }
+    user.password = password
+    await user.save()
+    await this.cacheManager.del(`forgotPassword-${verificationCode}`)
+    return true
   }
 
   private async generateAccessToken(id: string) {
